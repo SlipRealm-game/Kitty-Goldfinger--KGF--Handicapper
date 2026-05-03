@@ -1,7 +1,8 @@
 import streamlit as st
 
-st.set_page_config(page_title="KGF Handicapper", page_icon="🐱", layout="wide")
-st.title("🐱 Kitty Goldfinger (KGF) Handicapper")
+st.set_page_config(page_title="KGF Handicapper", layout="wide")
+st.title("Kitty Goldfinger (KGF) Handicapper")
+st.image("https://i.imgur.com/8YnqM.jpg", width=300)  # or local path
 st.subheader("Ocelli-Style Board-Hit Logic | Honoring Mom's Techniques")
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0):
