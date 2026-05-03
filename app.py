@@ -1,12 +1,15 @@
 import streamlit as st
 
-st.set_page_config(page_title="KGF Handicapper", layout="wide")
-st.title("Kitty Goldfinger (KGF) Handicapper")
-st.image("https://i.imgur.com/8YnqM.jpg", width=300)  # or local path
-st.subheader("Kitty's Handicapping Logic | Honoring Mom's Techniques")
+st.set_page_config(page_title="KGF Handicapper", page_icon="🐱", layout="wide")
+
+# Your local logo
+st.image("logo.jpg", width=400)
+
+st.title("🐱 Kitty Goldfinger (KGF) Handicapper")
+st.subheader("Kitty Style Handicapping Logic | Honoring Kitty's Techniques")
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0):
-    score = 0
+    score = 0        
     score += (speed * 0.4)
     score += (stamina * 2.0)
     score += (board_hit_rate * 25)
@@ -35,4 +38,4 @@ with tab1:
 with tab2:
     st.info("Pick 5 builder coming soon!")
 
-st.caption("KGF Handicapper v1 — Built with Mom's Logic + Mom's Wisdom 🐱💰")
+st.caption("KGF Handicapper v1 — Built Mom's Techniques + Mom's Wisdom 🐱💰")
