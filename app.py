@@ -1,16 +1,14 @@
 import streamlit as st
-import requests
+import pandas as pd
 
-st.set_page_config(page_title="KGF Handicapper", layout="wide")
+st.set_page_config(page_title="KGF Handicapper", page_icon="🐱", layout="wide")
 
-# === YOUR LOGO ===
-st.image("logo.jpg", width=400)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("logo.jpg", width=400)
 
 st.title("Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping Logic | Honoring Kitty's Techniques")
-
-# === RAPIDAPI KEY (put your key here) ===
-RAPIDAPI_KEY = st.text_input("RapidAPI Key (for live race data)", type="password", value="")
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0):
     score = 0        
@@ -56,7 +54,7 @@ with tab2:
 
 with tab3:
     st.subheader("🏇 Race Card Predictions")
-    st.write("Select track and race — then enter the field (or use RapidAPI for live data)")
+    st.write("Select track and race — then edit the full field in the table")
 
     tracks = [
         "Laurel Park", "Pimlico", "Churchill Downs", "Keeneland", "Gulfstream Park",
@@ -75,32 +73,27 @@ with tab3:
 
     st.write(f"**{track} — Race {race_num} — {date}**")
 
-    # RapidAPI placeholder
-    if RAPIDAPI_KEY and st.button("Load Live Race Data (RapidAPI)"):
-        st.info("Fetching from RapidAPI... (add your actual API call here)")
-        # Example:
-        # response = requests.get("https://horse-racing.p.rapidapi.com/race_entries", 
-        #     headers={"X-RapidAPI-Key": RAPIDAPI_KEY, "X-RapidAPI-Host": "horse-racing.p.rapidapi.com"},
-        #     params={"track": track.lower(), "date": str(date)})
-        # Then parse response.json()
+    # Bulk editable table for the entire race field
+    default_data = pd.DataFrame({
+        "Horse Name": [f"Horse {i}" for i in range(1, 11)],
+        "Speed Figure": [85] * 10,
+        "Stamina": [6] * 10,
+        "Odds": [10.0] * 10,
+        "Board Hit Rate": [0.6] * 10
+    })
 
-    # Manual entry fallback
-    num_horses = st.number_input("Horses in race", 4, 20, 10)
-    horses = []
-    for i in range(num_horses):
-        with st.expander(f"Horse {i+1}"):
-            name = st.text_input(f"Horse Name {i+1}", f"Horse {i+1}", key=f"name_{i}")
-            speed = st.number_input(f"Speed Figure {i+1}", 0, 120, 85, key=f"speed_{i}")
-            stamina = st.slider(f"Stamina {i+1}", 1, 10, 6, key=f"stamina_{i}")
-            odds = st.number_input(f"Odds {i+1}", 1.0, 100.0, 10.0, key=f"odds_{i}")
-            board_rate = st.slider(f"Board Hit Rate {i+1}", 0.0, 1.0, 0.6, key=f"board_{i}")
-            horses.append({"name": name, "speed": speed, "stamina": stamina, "odds": odds, "board": board_rate})
+    edited_df = st.data_editor(default_data, num_rows="dynamic", use_container_width=True)
 
     if st.button("🚀 Run KGF Predictions on Full Field"):
         results = []
-        for h in horses:
-            score, alert = kgf_score(h["name"], h["speed"], h["stamina"], h["odds"], h["board"])
-            results.append({"Horse": h["name"], "KGF Score": score, "Ocelli": "⚠️" if alert else ""})
+        for _, row in edited_df.iterrows():
+            name = row["Horse Name"]
+            speed = row["Speed Figure"]
+            stamina = row["Stamina"]
+            odds = row["Odds"]
+            board_rate = row["Board Hit Rate"]
+            score, alert = kgf_score(name, speed, stamina, odds, board_rate)
+            results.append({"Horse": name, "KGF Score": score, "Ocelli": "⚠️" if alert else ""})
 
         results.sort(key=lambda x: x["KGF Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
@@ -109,4 +102,4 @@ with tab3:
         for i, r in enumerate(results[:6], 1):
             st.write(f"{i}. {r['Horse']} (Score: {r['KGF Score']}) {r['Ocelli']}")
 
-st.caption("KGF Handicapper v1 — Built with Mom's Techniques + Mom's Wisdom 💰")
+st.caption("KGF Handicapper v1 — Built with Mom's Techniques + Mom's Wisdom 🐱💰")
