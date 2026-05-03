@@ -3,11 +3,9 @@ import pandas as pd
 
 st.set_page_config(page_title="KGF Handicapper", page_icon="🐱", layout="wide")
 
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.image("logo.jpg", width=400)
+st.image("logo.jpg", width=400)
 
-st.title("Kitty Goldfinger (KGF) Handicapper")
+st.title("🐱 Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping Logic | Honoring Kitty's Techniques")
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0):
@@ -54,7 +52,7 @@ with tab2:
 
 with tab3:
     st.subheader("🏇 Race Card Predictions")
-    st.write("Select track and race — then edit the full field in the table")
+    st.write("Select track and race — then edit the full field (PP, Horse #, Pedigree, etc.)")
 
     tracks = [
         "Laurel Park", "Pimlico", "Churchill Downs", "Keeneland", "Gulfstream Park",
@@ -73,9 +71,12 @@ with tab3:
 
     st.write(f"**{track} — Race {race_num} — {date}**")
 
-    # Bulk editable table for the entire race field
+    # Bulk editable table with Post Position, Horse #, Pedigree
     default_data = pd.DataFrame({
+        "PP": list(range(1, 11)),
+        "Horse #": list(range(1, 11)),
         "Horse Name": [f"Horse {i}" for i in range(1, 11)],
+        "Sire / Pedigree Note": [""] * 10,
         "Speed Figure": [85] * 10,
         "Stamina": [6] * 10,
         "Odds": [10.0] * 10,
@@ -93,13 +94,19 @@ with tab3:
             odds = row["Odds"]
             board_rate = row["Board Hit Rate"]
             score, alert = kgf_score(name, speed, stamina, odds, board_rate)
-            results.append({"Horse": name, "KGF Score": score, "Ocelli": "⚠️" if alert else ""})
+            results.append({
+                "PP": row["PP"],
+                "Horse": name, 
+                "Pedigree": row["Sire / Pedigree Note"],
+                "KGF Score": score, 
+                "Ocelli": "⚠️" if alert else ""
+            })
 
         results.sort(key=lambda x: x["KGF Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
         
         st.success("**KGF Top 6 Predictions**")
         for i, r in enumerate(results[:6], 1):
-            st.write(f"{i}. {r['Horse']} (Score: {r['KGF Score']}) {r['Ocelli']}")
+            st.write(f"{i}. PP {r['PP']} - {r['Horse']} (Score: {r['KGF Score']}) {r['Ocelli']} | Pedigree: {r['Pedigree']}")
 
 st.caption("KGF Handicapper v1 — Built with Mom's Techniques + Mom's Wisdom 🐱💰")
