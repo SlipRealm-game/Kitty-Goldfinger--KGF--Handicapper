@@ -138,5 +138,5 @@ with tab3:
             })
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
- 
-st.caption("KGF Handicapper v1 — Multi-Track Live Pull + Kitty's Wisdom 🐱💰")  
+
+st.caption("KGF Handicapper v1 — Multi-Track Live Pull + Kitty's Wisdom 🐱💰")
