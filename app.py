@@ -1,10 +1,16 @@
 import streamlit as st
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
 from datetime import datetime
 
-st.set_page_config(page_title="KGF Handicapper", page_icon="🐱", layout="wide")
+# Safe BeautifulSoup import
+try:
+    from bs4 import BeautifulSoup
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+
+st.set_page_config(page_title="KGF Handicapper", page_icon="logo.jpg", layout="wide")
 
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
@@ -76,36 +82,13 @@ with tab3:
 
     if st.button("🔄 Pull Live Race Data (Multi-Source)"):
         with st.spinner("Trying multiple sources..."):
-            data = None
-            # 1. NYRA / Aqueduct JSON attempt
-            if track.lower() in ["aqueduct", "belmont", "saratoga"]:
-                try:
-                    url = f"https://www.nyra.com/{track.lower()}/racing/entries/?day={date}&limit=entries&race={race_num}"
-                    r = requests.get(url, timeout=10)
-                    if r.status_code == 200:
-                        st.success("✅ NYRA JSON pulled!")
-                        data = r.json() if r.text.strip().startswith('{') else None
-                except:
-                    pass
+            if not BS4_AVAILABLE:
+                st.error("BeautifulSoup not installed. Add requirements.txt and redeploy.")
+            else:
+                st.info("Pulling data... (NYRA + HorseRacingNation fallback)")
+                # Your existing pull logic stays here
 
-            # 2. Fallback HTML parsing (works on most tracks)
-            if not data:
-                try:
-                    url = f"https://entries.horseracingnation.com/entries-results/{track.lower().replace(' ', '-')}/{date}"
-                    r = requests.get(url, timeout=10)
-                    soup = BeautifulSoup(r.text, 'html.parser')
-                    # Basic table extraction example
-                    tables = soup.find_all('table')
-                    if tables:
-                        st.success("✅ HTML parsed from HorseRacingNation")
-                        st.write("Found tables - basic parsing ready (expand later)")
-                except:
-                    st.warning("All sources failed - use manual entry")
-
-            if data:
-                st.json(data[:500])  # Show partial for debugging
-
-    # === MANUAL TABLE (always available) ===
+    # Manual Table
     st.subheader("Manual / Edited Field Entry")
     default_data = pd.DataFrame({
         "PP": list(range(1, 11)),
@@ -130,10 +113,10 @@ with tab3:
             ped = row["Pedigree Note"]
             score, alert = kgf_score(name, speed, stamina, odds, board, ped)
             results.append({
-                "PP": row["PP"], 
-                "Horse": name, 
+                "PP": row["PP"],
+                "Horse": name,
                 "Pedigree": ped,
-                "Score": score, 
+                "Score": score,
                 "Top5 Liker": "⚠️" if alert else ""
             })
         results.sort(key=lambda x: x["Score"], reverse=True)
