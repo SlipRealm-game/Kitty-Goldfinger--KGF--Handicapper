@@ -10,13 +10,19 @@ try:
 except ImportError:
     BS4_AVAILABLE = False
 
-st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
+# ================== PAGE CONFIG ==================
+st.set_page_config(
+    page_title="KGF Handicapper", 
+    page_icon="logo2.jpg", 
+    layout="wide"
+)
 
+# ================== MAIN LOGO ==================
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.image("logo.jpg", width=400)
+    st.image("logo.jpg", width=400)  
 
-st.title("logo2.jpg", width=40 Kitty Goldfinger (KGF) Handicapper")
+st.title("🐱 Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping Logic | Kitty's Proven Techniques")
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_note=""):
@@ -85,8 +91,7 @@ with tab3:
             if not BS4_AVAILABLE:
                 st.error("BeautifulSoup not installed. Add requirements.txt and redeploy.")
             else:
-                st.info("Pulling data... (NYRA + HorseRacingNation fallback)")
-                # Your existing pull logic stays here
+                st.info("Pulling data... (NYRA + fallback)")
 
     # Manual Table
     st.subheader("Manual / Edited Field Entry")
