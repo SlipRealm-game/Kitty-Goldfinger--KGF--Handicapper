@@ -20,7 +20,7 @@ st.set_page_config(
 # ================== MAIN LOGO ==================
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.image("logo.jpg", width=400)  
+    st.image("logo.jpg", width=1000)  
 
 st.title("Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping Logic | Kitty's Proven Techniques")
