@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import requests
+from datetime import datetime
 
 st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
 
@@ -8,7 +10,7 @@ with col2:
     st.image("logo.jpg", width=400)
 
 st.title("Kitty Goldfinger (KGF) Handicapper")
-st.subheader("Real Handicapping Assistant")
+st.subheader("Kitty Style Handicapping Logic | Honoring Kitty's Techniques")
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_note=""):
     score = 0
@@ -21,70 +23,78 @@ def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_not
 
     return round(score, 1), high_odds_hitter, pedigree_bonus
 
-# Expanded Real Data Library
-race_library = {
-    "Laurel Park - Race 7 (Today)": pd.DataFrame([
-        {"PP":1,"Horse Name":"Magical Mondays","Pedigree Note":"Strong turf","Speed Figure":105,"Stamina":8,"Odds":1.8,"Board Hit Rate":0.75},
-        {"PP":2,"Horse Name":"Brighty","Pedigree Note":"Demarchelier","Speed Figure":96,"Stamina":7,"Odds":10.0,"Board Hit Rate":0.65},
-        {"PP":3,"Horse Name":"Play It Cool","Pedigree Note":"Midshipman","Speed Figure":88,"Stamina":9,"Odds":20.0,"Board Hit Rate":0.55},
-        {"PP":4,"Horse Name":"Kitty's Son","Pedigree Note":"Cupid","Speed Figure":85,"Stamina":7,"Odds":20.0,"Board Hit Rate":0.50},
-        {"PP":6,"Horse Name":"Close The Gate","Pedigree Note":"Closer","Speed Figure":98,"Stamina":9,"Odds":3.5,"Board Hit Rate":0.70},
-        {"PP":7,"Horse Name":"Dalinar","Pedigree Note":"High class","Speed Figure":102,"Stamina":8,"Odds":2.5,"Board Hit Rate":0.72},
-    ]),
-    "2026 Preakness (May 16)": pd.DataFrame([
-        {"PP":1,"Horse Name":"Taj Mahal","Pedigree Note":"Local Maryland","Speed Figure":105,"Stamina":8,"Odds":5.0,"Board Hit Rate":0.80},
-        {"PP":2,"Horse Name":"Ocelli","Pedigree Note":"Derby 3rd","Speed Figure":98,"Stamina":9,"Odds":12.0,"Board Hit Rate":0.70},
-        {"PP":9,"Horse Name":"Iron Honor","Pedigree Note":"Chad Brown","Speed Figure":108,"Stamina":8,"Odds":9.0,"Board Hit Rate":0.70},
-    ])
-    # Add more races here as needed
-}
-
 tab1, tab2, tab3 = st.tabs(["Manual Entry", "Pick 5 Builder", "🏇 Race Card Predictions"])
 
 with tab1:
     st.subheader("Manual Horse Analysis")
-    selected_race = st.selectbox("Select Race", list(race_library.keys()))
-    horse_list = race_library[selected_race]["Horse Name"].tolist()
-    selected_horse = st.selectbox("Select Horse", horse_list)
-    
-    horse_row = race_library[selected_race][race_library[selected_race]["Horse Name"] == selected_horse].iloc[0]
-    
-    speed = st.number_input("Speed Figure", value=int(horse_row["Speed Figure"]))
-    stamina = st.slider("Stamina", 1, 10, int(horse_row["Stamina"]))
-    odds = st.number_input("Odds", value=float(horse_row["Odds"]))
-    board_rate = st.slider("Board Hit Rate", 0.0, 1.0, float(horse_row["Board Hit Rate"]))
-    pedigree = st.text_input("Pedigree Note", horse_row["Pedigree Note"])
+    name = st.text_input("Horse Name", "Play It Cool")
+    speed = st.number_input("Speed Figure", 0, 120, 85)
+    stamina = st.slider("Stamina (1-10)", 1, 10, 6)
+    odds = st.number_input("Odds", 1.0, 100.0, 20.0)
+    board_rate = st.slider("Board Hit Rate", 0.0, 1.0, 0.6)
+    pedigree = st.text_input("Pedigree Note (Secretariat, etc.)", "")
     
     if st.button("Analyze This Horse"):
-        score, hitter, ped_bonus = kgf_score(selected_horse, speed, stamina, odds, board_rate, pedigree)
-        st.success(f"**{selected_horse} Score: {score}**")
+        score, hitter, ped_bonus = kgf_score(name, speed, stamina, odds, board_rate, pedigree)
+        st.success(f"**{name} Score: {score}**")
         if hitter:
-            st.warning("🔥 High Odds Board Hitter — Great for boxes!")
+            st.warning("🔥 High Odds Board Hitter — Strong for boxes!")
         if ped_bonus:
             st.success("👑 Elite Pedigree!")
 
-with tab3:
-    st.subheader("Race Card Predictions")
-    selected_race = st.selectbox("Load Race", list(race_library.keys()))
+with tab2:
+    st.subheader("Pick 5 Builder")
+    st.write("Build your Pick 5")
+    races = ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"]
+    selections = {}
+    for r in races:
+        selections[r] = st.multiselect(f"{r} - Horses", ["Strong Favorite", "High Odds Hitter", "Pedigree Play", "Value Play"], default=["Strong Favorite"])
     
-    if st.button("Load Race Field"):
-        st.session_state.current_df = race_library[selected_race].copy()
-        st.success(f"Loaded {selected_race}")
+    if st.button("Calculate $0.50 Pick 5 Cost"):
+        combos = 1
+        for r in races:
+            combos *= len(selections[r])
+        cost = combos * 0.5
+        st.success(f"Total combinations: {combos:,} | **$0.50 Pick 5 Cost: ${cost:,.2f}**")
 
-    if 'current_df' in st.session_state:
-        edited_df = st.data_editor(st.session_state.current_df, num_rows="dynamic", use_container_width=True)
-    else:
-        edited_df = st.data_editor(pd.DataFrame({
-            "PP": list(range(1, 9)),
-            "Horse Name": [f"Horse {i}" for i in range(1, 9)],
-            "Pedigree Note": [""] * 8,
-            "Speed Figure": [85] * 8,
-            "Stamina": [6] * 8,
-            "Odds": [10.0] * 8,
-            "Board Hit Rate": [0.6] * 8
-        }), num_rows="dynamic", use_container_width=True)
+with tab3:
+    st.subheader("🏇 Race Card Predictions")
 
-    if st.button("🚀 Run KGF Predictions"):
+    tracks = ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs", 
+              "Gulfstream Park", "Saratoga", "Belmont Park", "Keeneland", "Del Mar"]
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        track = st.selectbox("Track", tracks)
+    with col2:
+        date = st.date_input("Race Date", value="today")
+    with col3:
+        race_num = st.number_input("Race Number", 1, 14, 6)
+
+    st.write(f"**{track} — Race {race_num} — {date}**")
+
+    # Try Live Pull Button
+    if st.button("🔄 Try Pull Live Data"):
+        with st.spinner("Attempting to pull data..."):
+            st.info("Racing Post / NYRA scraping is experimental. Trying...")
+            # You can expand this later with the rpscrape logic
+            st.warning("Live pull is limited. Using demo data for now.")
+
+    # Manual Table (always available)
+    st.subheader("Edit Race Field")
+    default_data = pd.DataFrame({
+        "PP": list(range(1, 11)),
+        "Horse Name": [f"Horse {i}" for i in range(1, 11)],
+        "Pedigree Note": [""] * 10,
+        "Speed Figure": [85] * 10,
+        "Stamina": [6] * 10,
+        "Odds": [10.0] * 10,
+        "Board Hit Rate": [0.6] * 10
+    })
+
+    edited_df = st.data_editor(default_data, num_rows="dynamic", use_container_width=True)
+
+    if st.button("🚀 Run KGF Predictions on Full Field"):
         results = []
         for _, row in edited_df.iterrows():
             name = row["Horse Name"]
@@ -102,7 +112,8 @@ with tab3:
                 "Score": score,
                 "Odds": odds,
                 "High Odds Hitter": "🔥" if hitter else "",
-                "Pedigree": "👑" if ped_bonus else ""
+                "Pedigree": "👑" if ped_bonus else "",
+                "Note": ped
             })
 
         results.sort(key=lambda x: x["Score"], reverse=True)
