@@ -1,14 +1,8 @@
 import streamlit as st
 import pandas as pd
-import requests
 
-st.set_page_config(
-    page_title="KGF Handicapper", 
-    page_icon="logo2.jpg", 
-    layout="wide"
-)
+st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
 
-# Main Logo
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     st.image("logo.jpg", width=400)
@@ -31,6 +25,7 @@ def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_not
 tab1, tab2, tab3 = st.tabs(["Manual Entry", "Pick 5 Builder", "🏇 Race Card Predictions"])
 
 with tab1:
+    # Your manual entry code remains the same
     st.subheader("Manual Horse Analysis")
     with st.form("kgf_form"):
         name = st.text_input("Horse Name", "Play It Cool")
@@ -47,6 +42,7 @@ with tab1:
                 st.warning("⚠️ Top-5 Liker / Ocelli Signal!")
 
 with tab2:
+    # Your Pick 5 code remains the same
     st.subheader("Pick 5 Builder")
     st.write("Select horses for 5 consecutive races")
     races = ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"]
@@ -63,35 +59,38 @@ with tab2:
 
 with tab3:
     st.subheader("🏇 Race Card Predictions")
-    
-    tracks = ["Aqueduct", "Santa Anita", "Laurel Park", "Mountaineer", "Churchill Downs", 
-              "Gulfstream Park", "Saratoga", "Belmont Park", "Keeneland", "Del Mar"]
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        track = st.selectbox("Track", tracks)
-    with col2:
-        date = st.date_input("Race Date", value="today")
-    with col3:
-        race_num = st.number_input("Race Number", 1, 14, 6)
 
-    st.write(f"**{track} — Race {race_num} — {date}**")
+    if st.button("🔄 Load 2026 Preakness Field (May 16)"):
+        preakness_data = pd.DataFrame([
+            {"PP": 1, "Horse Name": "Taj Mahal", "Pedigree Note": "Local Maryland horse, strong pedigree", "Speed Figure": 105, "Stamina": 8, "Odds": 5.0, "Board Hit Rate": 0.80},
+            {"PP": 2, "Horse Name": "Ocelli", "Pedigree Note": "Derby 3rd, board hitter", "Speed Figure": 98, "Stamina": 9, "Odds": 6.0, "Board Hit Rate": 0.65},
+            {"PP": 3, "Horse Name": "Crupper", "Pedigree Note": "Longshot with upside", "Speed Figure": 92, "Stamina": 7, "Odds": 30.0, "Board Hit Rate": 0.50},
+            {"PP": 4, "Horse Name": "Robusta", "Pedigree Note": "Doug O'Neill trainee", "Speed Figure": 94, "Stamina": 7, "Odds": 30.0, "Board Hit Rate": 0.55},
+            {"PP": 5, "Horse Name": "Talkin", "Pedigree Note": "Irad Ortiz Jr. mount", "Speed Figure": 96, "Stamina": 8, "Odds": 20.0, "Board Hit Rate": 0.60},
+            {"PP": 6, "Horse Name": "Chip Honcho", "Pedigree Note": "Asmussen, consistent", "Speed Figure": 102, "Stamina": 7, "Odds": 5.0, "Board Hit Rate": 0.75},
+            {"PP": 7, "Horse Name": "The Hell We Did", "Pedigree Note": "Todd Fincher", "Speed Figure": 97, "Stamina": 8, "Odds": 15.0, "Board Hit Rate": 0.58},
+            {"PP": 8, "Horse Name": "Bull by the Horns", "Pedigree Note": "Saffie Joseph", "Speed Figure": 93, "Stamina": 7, "Odds": 30.0, "Board Hit Rate": 0.50},
+            {"PP": 9, "Horse Name": "Iron Honor", "Pedigree Note": "Chad Brown", "Speed Figure": 108, "Stamina": 8, "Odds": 9.0, "Board Hit Rate": 0.70},
+            {"PP": 10, "Horse Name": "Napoleon Solo", "Pedigree Note": "Mid-pack type", "Speed Figure": 99, "Stamina": 8, "Odds": 8.0, "Board Hit Rate": 0.65},
+        ])
+        st.success("✅ 2026 Preakness Field Loaded!")
+        st.dataframe(preakness_data, use_container_width=True)
+        st.session_state.edited_df = preakness_data  # Optional: save to session for editing
 
-    st.info("🔄 Auto-pull coming soon. For now use the table below.")
-
-    # Manual Table - This is the main working part
-    st.subheader("Enter / Edit Race Field")
-    default_data = pd.DataFrame({
-        "PP": list(range(1, 11)),
-        "Horse Name": [f"Horse {i}" for i in range(1, 11)],
-        "Pedigree Note": [""] * 10,
-        "Speed Figure": [85] * 10,
-        "Stamina": [6] * 10,
-        "Odds": [10.0] * 10,
-        "Board Hit Rate": [0.6] * 10
-    })
-
-    edited_df = st.data_editor(default_data, num_rows="dynamic", use_container_width=True)
+    st.subheader("Edit Race Field")
+    if 'edited_df' in st.session_state:
+        edited_df = st.data_editor(st.session_state.edited_df, num_rows="dynamic", use_container_width=True)
+    else:
+        default_data = pd.DataFrame({
+            "PP": list(range(1, 11)),
+            "Horse Name": [f"Horse {i}" for i in range(1, 11)],
+            "Pedigree Note": [""] * 10,
+            "Speed Figure": [85] * 10,
+            "Stamina": [6] * 10,
+            "Odds": [10.0] * 10,
+            "Board Hit Rate": [0.6] * 10
+        })
+        edited_df = st.data_editor(default_data, num_rows="dynamic", use_container_width=True)
 
     if st.button("🚀 Run KGF Predictions on Full Field"):
         results = []
@@ -113,4 +112,4 @@ with tab3:
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
 
-st.caption("KGF Handicapper v1 — Built with Mom's Wisdom")
+st.caption("KGF Handicapper v1 — Built with + Mom's Wisdom")
