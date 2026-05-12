@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import requests
 
 st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
 
@@ -8,8 +7,8 @@ col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     st.image("logo.jpg", width=400)
 
-st.title("Kitty Goldfinger (KGF) Handicapper")
-st.subheader("Kitty Style Handicapping Logic | Honoring Kitty's Techniques")
+st.title("🐱 Kitty Goldfinger (KGF) Handicapper")
+st.subheader("Real Handicapping Assistant - Honoring Kitty's Techniques")
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_note=""):
     score = 0
@@ -17,59 +16,16 @@ def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_not
     score += (stamina * 2.2)
     score += (board_hit_rate * 25)
 
-    # High Odds Board Hitter Signal (your main request)
-    high_odds_hitter = (odds >= 12 and board_hit_rate >= 0.50)
-    
-    # Pedigree Bonus
-    pedigree_bonus = any(x in pedigree_note.lower() for x in [
-        "secretariat", "justify", "pharoah", "chrome", "triple crown", "northern dancer"
-    ])
+    high_odds_hitter = odds >= 12 and board_hit_rate >= 0.50
+    pedigree_bonus = any(x in pedigree_note.lower() for x in ["secretariat", "justify", "pharoah", "chrome", "triple crown"])
 
     return round(score, 1), high_odds_hitter, pedigree_bonus
 
 tab1, tab2, tab3 = st.tabs(["Manual Entry", "Pick 5 Builder", "🏇 Race Card Predictions"])
 
-with tab1:
-    st.subheader("Manual Horse Analysis")
-    with st.form("kgf_form"):
-        name = st.text_input("Horse Name", "Play It Cool")
-        speed = st.number_input("Speed Figure", 0, 120, 85)
-        stamina = st.slider("Stamina (1-10)", 1, 10, 6)
-        odds = st.number_input("Odds", 1.0, 100.0, 20.0)
-        board_rate = st.slider("Board Hit Rate", 0.0, 1.0, 0.6)
-        pedigree = st.text_input("Pedigree Note (Secretariat, Triple Crown, etc.)", "")
-        
-        if st.form_submit_button("Run KGF"):
-            score, hitter, ped_bonus = kgf_score(name, speed, stamina, odds, board_rate, pedigree)
-            st.success(f"**{name} Score: {score}**")
-            if hitter:
-                st.warning("🔥 High Odds Board Hitter — Strong for boxes!")
-            if ped_bonus:
-                st.success("👑 Elite Pedigree Detected!")
-
-with tab2:
-    st.subheader("Pick 5 Builder")
-    st.write("Select horses for 5 consecutive races")
-    races = ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"]
-    selections = {}
-    for r in races:
-        selections[r] = st.multiselect(f"{r} - Horses", 
-            ["#1 Favorite", "#2 Value", "#3 Longshot", "#4 Bomb", "#5 Pedigree Play"], 
-            default=["#1 Favorite"])
-    
-    if st.button("Calculate $0.50 Pick 5 Cost"):
-        combos = 1
-        for r in races:
-            combos *= len(selections[r])
-        cost = combos * 0.5
-        st.success(f"Total combinations: {combos:,} | **$0.50 Pick 5 Cost: ${cost:,.2f}**")
-
 with tab3:
-    st.subheader("🏇 Race Card Predictions")
-
-    tracks = ["Aqueduct", "Santa Anita", "Laurel Park", "Mountaineer", "Churchill Downs", 
-              "Gulfstream Park", "Saratoga", "Belmont Park"]
-    
+    st.subheader("Select Race")
+    tracks = ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs", "Gulfstream Park"]
     col1, col2, col3 = st.columns(3)
     with col1:
         track = st.selectbox("Track", tracks)
@@ -78,27 +34,39 @@ with tab3:
     with col3:
         race_num = st.number_input("Race Number", 1, 14, 6)
 
-    st.write(f"**{track} — Race {race_num} — {date}**")
+    if st.button("🔄 Load Race Horses"):
+        # Demo data for different races (you can expand this)
+        if track == "Laurel Park" and race_num == 7:
+            df = pd.DataFrame([
+                {"PP":1, "Horse Name":"Magical Mondays", "Trainer":"McGaughey", "Pedigree Note":"Strong turf", "Speed Figure":105, "Stamina":8, "Odds":1.8, "Board Hit Rate":0.75},
+                {"PP":2, "Horse Name":"Brighty", "Trainer":"Motion", "Pedigree Note":"Demarchelier", "Speed Figure":96, "Stamina":7, "Odds":10.0, "Board Hit Rate":0.65},
+                {"PP":3, "Horse Name":"Play It Cool", "Trainer":"Delgado", "Pedigree Note":"Midshipman", "Speed Figure":88, "Stamina":9, "Odds":20.0, "Board Hit Rate":0.55},
+                {"PP":4, "Horse Name":"Kitty's Son", "Trainer":"Maker", "Pedigree Note":"Cupid", "Speed Figure":85, "Stamina":7, "Odds":20.0, "Board Hit Rate":0.50},
+            ])
+        else:
+            df = pd.DataFrame([
+                {"PP":1, "Horse Name":"Favorite Horse", "Trainer":"Baffert", "Pedigree Note":"Secretariat line", "Speed Figure":105, "Stamina":8, "Odds":3.5, "Board Hit Rate":0.80},
+                {"PP":2, "Horse Name":"Value Play", "Trainer":"Asmussen", "Pedigree Note":"", "Speed Figure":98, "Stamina":7, "Odds":8.0, "Board Hit Rate":0.65},
+            ])
+        st.success(f"Loaded {track} Race {race_num}")
+        st.session_state.current_df = df
 
-    if st.button("🔄 Pull Live Race Data"):
-        st.info("🔄 Auto-pull is being developed. For now use the table below to enter horses.")
-        st.success("✅ Demo Preakness / Major Race data can be added here in future updates.")
+    st.subheader("Race Field")
+    if 'current_df' in st.session_state:
+        edited_df = st.data_editor(st.session_state.current_df, num_rows="dynamic", use_container_width=True)
+    else:
+        edited_df = st.data_editor(pd.DataFrame({
+            "PP": list(range(1, 9)),
+            "Horse Name": [f"Horse {i}" for i in range(1, 9)],
+            "Trainer": ["" for _ in range(8)],
+            "Pedigree Note": ["" for _ in range(8)],
+            "Speed Figure": [85] * 8,
+            "Stamina": [6] * 8,
+            "Odds": [10.0] * 8,
+            "Board Hit Rate": [0.6] * 8
+        }), num_rows="dynamic", use_container_width=True)
 
-    # Manual Table
-    st.subheader("Edit Race Field")
-    default_data = pd.DataFrame({
-        "PP": list(range(1, 11)),
-        "Horse Name": [f"Horse {i}" for i in range(1, 11)],
-        "Pedigree Note": [""] * 10,
-        "Speed Figure": [85] * 10,
-        "Stamina": [6] * 10,
-        "Odds": [10.0] * 10,
-        "Board Hit Rate": [0.6] * 10
-    })
-
-    edited_df = st.data_editor(default_data, num_rows="dynamic", use_container_width=True)
-
-    if st.button("🚀 Run KGF Predictions on Full Field"):
+    if st.button("🚀 Run KGF Analysis"):
         results = []
         for _, row in edited_df.iterrows():
             name = row["Horse Name"]
@@ -113,14 +81,15 @@ with tab3:
             results.append({
                 "PP": row["PP"],
                 "Horse": name,
+                "Trainer": row.get("Trainer", ""),
                 "Score": score,
                 "Odds": odds,
                 "High Odds Hitter": "🔥" if hitter else "",
-                "Pedigree Bonus": "👑" if ped_bonus else "",
-                "Pedigree Note": ped
+                "Pedigree": "👑" if ped_bonus else "",
+                "Note": ped
             })
 
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
 
-st.caption("KGF Handicapper v1 — Built with Mom's Wisdom")
+st.caption("KGF Handicapper v1 — Testing Version")
