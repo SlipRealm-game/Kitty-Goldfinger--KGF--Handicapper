@@ -1,26 +1,17 @@
 import streamlit as st
 import pandas as pd
 import requests
-from datetime import datetime
 
-# Safe BeautifulSoup import
-try:
-    from bs4 import BeautifulSoup
-    BS4_AVAILABLE = True
-except ImportError:
-    BS4_AVAILABLE = False
-
-# ================== PAGE CONFIG ==================
 st.set_page_config(
     page_title="KGF Handicapper", 
     page_icon="logo2.jpg", 
     layout="wide"
 )
 
-# ================== MAIN LOGO ==================
+# Main Logo
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.image("logo.jpg", width=5000)  
+    st.image("logo.jpg", width=400)
 
 st.title("Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping Logic | Kitty's Proven Techniques")
@@ -71,7 +62,7 @@ with tab2:
         st.success(f"Total combinations: {combos:,} | **$0.50 Pick 5 Cost: ${cost:,.2f}**")
 
 with tab3:
-    st.subheader("🏇 Race Card Predictions - Multi-Track Live Pull")
+    st.subheader("🏇 Race Card Predictions")
     
     tracks = ["Aqueduct", "Santa Anita", "Laurel Park", "Mountaineer", "Churchill Downs", 
               "Gulfstream Park", "Saratoga", "Belmont Park", "Keeneland", "Del Mar"]
@@ -86,15 +77,10 @@ with tab3:
 
     st.write(f"**{track} — Race {race_num} — {date}**")
 
-    if st.button("🔄 Pull Live Race Data (Multi-Source)"):
-        with st.spinner("Trying multiple sources..."):
-            if not BS4_AVAILABLE:
-                st.error("BeautifulSoup not installed. Add requirements.txt and redeploy.")
-            else:
-                st.info("Pulling data... (NYRA + fallback)")
+    st.info("🔄 Auto-pull coming soon. For now use the table below.")
 
-    # Manual Table
-    st.subheader("Manual / Edited Field Entry")
+    # Manual Table - This is the main working part
+    st.subheader("Enter / Edit Race Field")
     default_data = pd.DataFrame({
         "PP": list(range(1, 11)),
         "Horse Name": [f"Horse {i}" for i in range(1, 11)],
@@ -127,4 +113,4 @@ with tab3:
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
 
-st.caption("KGF Handicapper v1 — Multi-Track Live Pull + Kitty's Wisdom")
+st.caption("KGF Handicapper v1 — Built with Mom's Wisdom")
