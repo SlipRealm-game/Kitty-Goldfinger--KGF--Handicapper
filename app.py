@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
 
-st.image("logo.jpg", width=650)
+st.image("logo.jpg", width=400)
 
 st.title("Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping | Honoring Kitty's Techniques")
@@ -40,14 +40,18 @@ with tab1:
 
 with tab2:
     st.subheader("Pick 5 Builder")
-    st.write("Build your Pick 5")
-    track = st.selectbox("Track", ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs"])
-    for i in range(1, 6):
-        st.multiselect(f"Race {i} - Horses", ["Strong Favorite", "High Odds Hitter", "Pedigree Play"], default=["Strong Favorite"])
+    track = st.selectbox("Pick 5 Track", ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs"], key="pick5_track")
+    st.write(f"Building Pick 5 for **{track}**")
+    
+    races = ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"]
+    for r in races:
+        st.multiselect(f"{r} - Horse Type", 
+            ["Strong Favorite", "High Odds Hitter", "Pedigree Play", "Value Play"], 
+            default=["Strong Favorite"], key=f"pick5_{r}")
 
 with tab3:
     st.subheader("🏇 Race Card Predictions")
-    track = st.selectbox("Track", ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs"])
+    track = st.selectbox("Track", ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs"], key="racecard_track")
     date = st.date_input("Race Date", value="today")
     race_num = st.number_input("Race Number", 1, 14, 6)
 
@@ -90,5 +94,4 @@ with tab3:
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
 
-st.caption("KGF Handicapper v1 — Built Using Mom's Techniques 💰")
-
+st.caption("KGF Handicapper v1 — Built Using Mom's Techniques💰")
