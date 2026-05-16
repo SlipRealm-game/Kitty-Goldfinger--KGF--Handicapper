@@ -1,16 +1,12 @@
 import streamlit as st
 import pandas as pd
-import requests
 
 st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
 
-# Large Logo
 st.image("logo.jpg", width=650)
 
 st.title("Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping | Honoring Kitty's Techniques")
-
-RAPIDAPI_KEY = "39171a45bemsh0b148cc74b98d59p113376jsnba83cc13ac54"
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_note=""):
     score = 0
@@ -44,51 +40,18 @@ with tab1:
 
 with tab2:
     st.subheader("Pick 5 Builder")
-    track = st.selectbox("Pick 5 Track", ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs"])
-    st.write(f"Building Pick 5 for **{track}**")
-    
-    races = ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"]
-    for r in races:
-        st.multiselect(f"{r} - Horse Type", 
-            ["Strong Favorite", "High Odds Hitter", "Pedigree Play", "Value Play"], 
-            default=["Strong Favorite"])
-
-    if st.button("Calculate $0.50 Pick 5 Cost"):
-        st.success("Pick 5 Cost Calculator Ready")
+    st.write("Build your Pick 5")
+    track = st.selectbox("Track", ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs"])
+    for i in range(1, 6):
+        st.multiselect(f"Race {i} - Horses", ["Strong Favorite", "High Odds Hitter", "Pedigree Play"], default=["Strong Favorite"])
 
 with tab3:
     st.subheader("🏇 Race Card Predictions")
-    
-    tracks = ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs", 
-              "Gulfstream Park", "Saratoga", "Belmont Park"]
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        track = st.selectbox("Track", tracks)
-    with col2:
-        date = st.date_input("Race Date", value="today")
-    with col3:
-        race_num = st.number_input("Race Number", 1, 14, 6)
+    track = st.selectbox("Track", ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs"])
+    date = st.date_input("Race Date", value="today")
+    race_num = st.number_input("Race Number", 1, 14, 6)
 
     st.write(f"**{track} — Race {race_num} — {date}**")
-
-    if st.button("🔄 Pull with RapidAPI"):
-        try:
-            url = "https://horse-racing-usa.p.rapidapi.com/racecards"   # Better endpoint
-            headers = {
-                "X-RapidAPI-Key": RAPIDAPI_KEY,
-                "X-RapidAPI-Host": "horse-racing-usa.p.rapidapi.com"
-            }
-            params = {"date": str(date)}
-            response = requests.get(url, headers=headers, params=params, timeout=15)
-            
-            if response.status_code == 200:
-                st.success("✅ RapidAPI Data Pulled!")
-                st.json(response.json())
-            else:
-                st.error(f"RapidAPI Error: {response.status_code}")
-        except Exception as e:
-            st.error(f"RapidAPI failed: {e}")
 
     st.subheader("Edit Race Field")
     default_data = pd.DataFrame({
@@ -127,4 +90,5 @@ with tab3:
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
 
-st.caption("KGF Handicapper v1 — Built Using Mom's Techniques💰")
+st.caption("KGF Handicapper v1 — Built Using Mom's Techniques 💰")
+
