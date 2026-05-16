@@ -12,7 +12,7 @@ st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="
 
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.image("logo.jpg", width=1500)
+    st.image("logo.jpg", width=5000)
 
 st.title("🐱 Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping | Honoring Kitty's Techniques")
