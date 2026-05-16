@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import requests
 import sys
 import os
 
@@ -9,11 +10,14 @@ if os.path.exists("rpscrape"):
 
 st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
 
-# Larger Logo at Top
-st.image("logo.jpg", width=650)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image("logo.jpg", width=1500)
 
-st.title("Kitty Goldfinger (KGF) Handicapper")
+st.title("🐱 Kitty Goldfinger (KGF) Handicapper")
 st.subheader("Kitty Style Handicapping | Honoring Kitty's Techniques")
+
+RAPIDAPI_KEY = "39171a45bemsh0b148cc74b98d59p113376jsnba83cc13ac54"  # Your key
 
 def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_note=""):
     score = 0
@@ -47,7 +51,11 @@ with tab1:
 
 with tab2:
     st.subheader("Pick 5 Builder")
-    st.write("Select horses for the next 5 races")
+    st.write("Build your Pick 5 based on analysis")
+    tracks = ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs", 
+              "Gulfstream Park", "Saratoga", "Belmont Park"]
+    track = st.selectbox("Pick 5 Track", tracks)
+    
     races = ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"]
     selections = {}
     for r in races:
@@ -66,7 +74,7 @@ with tab3:
     st.subheader("🏇 Race Card Predictions")
     
     tracks = ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs", 
-              "Gulfstream Park", "Saratoga", "Belmont Park", "Keeneland", "Del Mar"]
+              "Gulfstream Park", "Saratoga", "Belmont Park"]
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -78,10 +86,36 @@ with tab3:
 
     st.write(f"**{track} — Race {race_num} — {date}**")
 
-    if st.button("🔄 Load Race Field"):
-        st.success(f"Loaded {track} Race {race_num} (Demo data - rpscrape ready)")
-        # You can expand this with real scraper later
+    # ================== BOTH PULL BUTTONS ==================
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🔄 Pull with RapidAPI"):
+            try:
+                url = "https://horse-racing-usa.p.rapidapi.com/race"
+                headers = {
+                    "X-RapidAPI-Key": RAPIDAPI_KEY,
+                    "X-RapidAPI-Host": "horse-racing-usa.p.rapidapi.com"
+                }
+                params = {"track": track.lower().replace(" ", "-"), "date": str(date), "race": race_num}
+                response = requests.get(url, headers=headers, params=params, timeout=15)
+                if response.status_code == 200:
+                    st.success("✅ RapidAPI Data Pulled!")
+                    st.json(response.json())
+                else:
+                    st.error(f"RapidAPI Error: {response.status_code}")
+            except Exception as e:
+                st.error(f"RapidAPI failed: {e}")
 
+    with col2:
+        if st.button("🔄 Pull with rpscrape"):
+            try:
+                import racecards
+                st.success("✅ rpscrape imported!")
+                st.info("rpscrape pull attempted (check logs)")
+            except Exception as e:
+                st.error(f"rpscrape failed: {e}")
+
+    # Manual Table
     st.subheader("Edit Race Field")
     default_data = pd.DataFrame({
         "PP": list(range(1, 11)),
@@ -119,4 +153,4 @@ with tab3:
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
 
-st.caption("KGF Handicapper v1 — Build with Mom's Techniques and Insights 💰")
+st.caption("KGF Handicapper v1 — Double Pull Method - Built with Mom's Techniques and Insights 💰")
