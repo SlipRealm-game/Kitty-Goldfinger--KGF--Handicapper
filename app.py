@@ -1,7 +1,14 @@
-import streamlit as st
+✅ Perfect! You have successfully added the rpscrape folder.
+
+Final Clean app.py (Copy & Paste This)
+Pythonimport streamlit as st
 import pandas as pd
-import requests
-from datetime import datetime
+import sys
+import os
+
+# === Add rpscrape support ===
+if os.path.exists("rpscrape"):
+    sys.path.append("rpscrape")
 
 st.set_page_config(page_title="KGF Handicapper", page_icon="logo2.jpg", layout="wide")
 
@@ -25,62 +32,29 @@ def kgf_score(horse_name, speed, stamina, odds, board_hit_rate=0.0, pedigree_not
 
 tab1, tab2, tab3 = st.tabs(["Manual Entry", "Pick 5 Builder", "🏇 Race Card Predictions"])
 
-with tab1:
-    st.subheader("Manual Horse Analysis")
-    name = st.text_input("Horse Name", "Play It Cool")
-    speed = st.number_input("Speed Figure", 0, 120, 85)
-    stamina = st.slider("Stamina (1-10)", 1, 10, 6)
-    odds = st.number_input("Odds", 1.0, 100.0, 20.0)
-    board_rate = st.slider("Board Hit Rate", 0.0, 1.0, 0.6)
-    pedigree = st.text_input("Pedigree Note (Secretariat, etc.)", "")
-    
-    if st.button("Analyze This Horse"):
-        score, hitter, ped_bonus = kgf_score(name, speed, stamina, odds, board_rate, pedigree)
-        st.success(f"**{name} Score: {score}**")
-        if hitter:
-            st.warning("🔥 High Odds Board Hitter — Strong for boxes!")
-        if ped_bonus:
-            st.success("👑 Elite Pedigree!")
-
-with tab2:
-    st.subheader("Pick 5 Builder")
-    st.write("Build your Pick 5")
-    races = ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"]
-    selections = {}
-    for r in races:
-        selections[r] = st.multiselect(f"{r} - Horses", ["Strong Favorite", "High Odds Hitter", "Pedigree Play", "Value Play"], default=["Strong Favorite"])
-    
-    if st.button("Calculate $0.50 Pick 5 Cost"):
-        combos = 1
-        for r in races:
-            combos *= len(selections[r])
-        cost = combos * 0.5
-        st.success(f"Total combinations: {combos:,} | **$0.50 Pick 5 Cost: ${cost:,.2f}**")
-
 with tab3:
     st.subheader("🏇 Race Card Predictions")
 
-    tracks = ["Santa Anita", "Laurel Park", "Aqueduct", "Mountaineer", "Churchill Downs", 
-              "Gulfstream Park", "Saratoga", "Belmont Park", "Keeneland", "Del Mar"]
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        track = st.selectbox("Track", tracks)
-    with col2:
-        date = st.date_input("Race Date", value="today")
-    with col3:
-        race_num = st.number_input("Race Number", 1, 14, 6)
+    if st.button("🔄 Test rpscrape Import"):
+        try:
+            import racecards
+            st.success("✅ rpscrape successfully imported!")
+        except Exception as e:
+            st.error(f"rpscrape import failed: {e}")
 
-    st.write(f"**{track} — Race {race_num} — {date}**")
+    # Race Selection
+    selected_race = st.selectbox("Select Race", [
+        "Laurel Park - Race 7",
+        "2026 Preakness",
+        "Santa Anita - Race 6",
+        "Mountaineer - Race 1"
+    ])
 
-    # Try Live Pull Button
-    if st.button("🔄 Try Pull Live Data"):
-        with st.spinner("Attempting to pull data..."):
-            st.info("Racing Post / NYRA scraping is experimental. Trying...")
-            # You can expand this later with the rpscrape logic
-            st.warning("Live pull is limited. Using demo data for now.")
+    if st.button("🔄 Load Race Field"):
+        # You can expand this later with real scraper
+        st.info("Loading demo data... (rpscrape ready for future use)")
 
-    # Manual Table (always available)
+    # Manual Table (Main Working Area)
     st.subheader("Edit Race Field")
     default_data = pd.DataFrame({
         "PP": list(range(1, 11)),
@@ -112,11 +86,10 @@ with tab3:
                 "Score": score,
                 "Odds": odds,
                 "High Odds Hitter": "🔥" if hitter else "",
-                "Pedigree": "👑" if ped_bonus else "",
-                "Note": ped
+                "Pedigree": "👑" if ped_bonus else ""
             })
 
         results.sort(key=lambda x: x["Score"], reverse=True)
         st.dataframe(results, use_container_width=True)
 
-st.caption("KGF Handicapper v1 — Built with Mom's Wisdom")
+st.caption("KGF Handicapper v1 — Built with Mom's Logic and Wisdom 🐱💰")
